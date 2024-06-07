@@ -1,0 +1,18 @@
+// for development convienience, this file helps IDE's find relative paths prefixed with
+// the `@salesforce/retail-react-app' for Template Extensibility projects
+// If any aliases are defined in the webpack.config.js file, they need to be mirrored here.
+
+// jsconfig.json
+{
+    "compilerOptions": {
+        "target": "ES6",
+        "baseUrl": "./",
+        "paths": {
+            // Add @salesforce files for better DX
+            "@salesforce/*": ["./node_modules/@salesforce/*", "./node_modules/@salesforce/*/index"],
+            // Add local bloomreach override
+            "@bloomreach/*": ["./bloomreach/*", "./bloomreach/*/index"],
+            "~/*": ["./overrides/*", "./overrides/*/index"]
+        }
+    }
+}
