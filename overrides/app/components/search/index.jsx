@@ -39,6 +39,7 @@ import {
     searchUrlBuilder,
     categoryUrlBuilder
 } from '@salesforce/retail-react-app/app/utils/url'
+import {useCurrency} from '@salesforce/retail-react-app/app/hooks'
 
 // Bloomreach import
 import SearchSuggestions from './partials/search-suggestions'
@@ -47,7 +48,9 @@ import {getQueryParamsSettings} from '@bloomreach/data-access/client/queries/hel
 import {apiURL} from '@bloomreach/constants'
 import {useLocation} from 'react-router'
 import {getAppOrigin} from '@salesforce/pwa-kit-react-sdk/utils/url'
+import {useBloomreachAnalytics} from '@bloomreach/hooks/analytics'
 import {navigateRedirect} from '@bloomreach/utils'
+import {getConfig} from '@salesforce/pwa-kit-runtime/utils/ssr-config'
 
 const formatSuggestions = (searchSuggestions, input) => {
     return {
@@ -68,7 +71,8 @@ const formatSuggestions = (searchSuggestions, input) => {
                 price: product.price,
                 productId: product.productId,
                 name: boldString(product.productName, capitalize(input)),
-                link: productUrlBuilder({id: product.productId})
+                link: productUrlBuilder({id: product.productId}),
+                image: product?.thumbImage
             }
         }),
         phraseSuggestions: searchSuggestions?.categorySuggestions?.suggestedPhrases?.map(
@@ -95,6 +99,8 @@ const Search = (props) => {
     const [isOpen, setIsOpen] = useState(false)
     const [searchQuery, setSearchQuery] = useState('')
     const navigate = useNavigation()
+    const {currency} = useCurrency()
+    const {log} = useBloomreachAnalytics()
 
     // Bloomreach Search Suggestions
     const location = useLocation()
@@ -115,6 +121,8 @@ const Search = (props) => {
         () => formatSuggestions(searchSuggestion.data, searchInputRef?.current?.value),
         [searchSuggestion]
     )
+
+    const {app: appConfig} = getConfig()
 
     // check if popover should open if we have suggestions
     useEffect(() => {
@@ -166,6 +174,7 @@ const Search = (props) => {
         e.preventDefault()
         // Avoid blank spaces to be searched
         let searchText = searchInputRef.current.value.trim()
+
         // Avoid empty string searches
         if (searchText.length < 1) {
             return
@@ -183,14 +192,15 @@ const Search = (props) => {
 
         // Replace the placeholders with actual values
         const queryParams = new URLSearchParams({
-            ...getQueryParamsSettings({appOrigin, location}),
+            ...getQueryParamsSettings({appOrigin, location, appConfig}),
             request_type: 'search',
             search_type: 'keyword',
             fl: 'pid',
             q: searchText,
             // The number of products is not important here
             rows: '1',
-            start: '0'
+            start: '0',
+            view_id: currency.toLowerCase()
         })
 
         const apiUrlWithParams = `${apiURL}?${queryParams}`
@@ -203,6 +213,13 @@ const Search = (props) => {
             }
 
             const data = await response.json()
+            log({
+                eventGroup: 'suggest',
+                eventType: 'submit',
+                eventData: {
+                    q: searchText
+                }
+            })
             if (data?.keywordRedirect) {
                 navigateRedirect(navigate, data?.keywordRedirect?.['redirected url'])
             } else {
@@ -284,11 +301,12 @@ const Search = (props) => {
                 </PopoverTrigger>
 
                 <HideOnMobile>
-                    <PopoverContent data-testid="sf-suggestion-popover">
+                    <PopoverContent data-testid="sf-suggestion-popover" width="320px">
                         <SearchSuggestions
                             closeAndNavigate={closeAndNavigate}
                             recentSearches={recentSearches}
                             searchSuggestions={searchSuggestions}
+                            searchQuery={searchQuery}
                         />
                     </PopoverContent>
                 </HideOnMobile>
@@ -317,6 +335,7 @@ const Search = (props) => {
                             closeAndNavigate={closeAndNavigate}
                             recentSearches={recentSearches}
                             searchSuggestions={searchSuggestions}
+                            searchQuery={searchQuery}
                         />
                     )}
                 </Flex>

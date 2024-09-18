@@ -34,6 +34,8 @@ import {useServerContext} from '@salesforce/pwa-kit-react-sdk/ssr/universal/hook
 import {useProductSearch} from '@salesforce/commerce-sdk-react'
 
 import {useBloomreachAnalytics} from '@bloomreach/hooks/analytics'
+import WidgetProductScroller from '@bloomreach/components/WidgetProductScroller'
+import {getConfig} from '@salesforce/pwa-kit-runtime/utils/ssr-config'
 
 /**
  * This is the home page for Retail React App.
@@ -46,6 +48,7 @@ const Home = () => {
     const einstein = useEinstein()
     const {pathname} = useLocation()
     const {track} = useBloomreachAnalytics()
+    const {app: appConfig} = getConfig()
 
     // useServerContext is a special hook introduced in v3 PWA Kit SDK.
     // It replaces the legacy `getProps` and provide a react hook interface for SSR.
@@ -106,57 +109,14 @@ const Home = () => {
                 }
             />
 
-            {productSearchResult && (
-                <Section
-                    padding={4}
-                    paddingTop={16}
-                    title={intl.formatMessage({
-                        defaultMessage: 'Shop Products',
-                        id: 'home.heading.shop_products'
-                    })}
-                    subtitle={intl.formatMessage(
-                        {
-                            defaultMessage:
-                                'This section contains content from the catalog. {docLink} on how to replace it.',
-                            id: 'home.description.shop_products',
-                            description:
-                                '{docLink} is a html button that links the user to https://sfdc.co/business-manager-manage-catalogs'
-                        },
-                        {
-                            docLink: (
-                                <Link
-                                    target="_blank"
-                                    href={'https://sfdc.co/business-manager-manage-catalogs'}
-                                    textDecoration={'none'}
-                                    position={'relative'}
-                                    _after={{
-                                        position: 'absolute',
-                                        content: `""`,
-                                        height: '2px',
-                                        bottom: '-2px',
-                                        margin: '0 auto',
-                                        left: 0,
-                                        right: 0,
-                                        background: 'gray.700'
-                                    }}
-                                    _hover={{textDecoration: 'none'}}
-                                >
-                                    {intl.formatMessage({
-                                        defaultMessage: 'Read docs',
-                                        id: 'home.link.read_docs'
-                                    })}
-                                </Link>
-                            )
-                        }
-                    )}
-                >
-                    <Stack pt={8} spacing={16}>
-                        <ProductScroller
-                            products={productSearchResult?.hits}
-                            isLoading={isLoading}
-                        />
-                    </Stack>
-                </Section>
+            {appConfig?.blm?.widgetBestSellerId && (
+                <WidgetProductScroller
+                    mx={{base: -4, md: -8, lg: 0}}
+                    widgetSettings={{
+                        id: appConfig.blm.widgetBestSellerId,
+                        type: 'global'
+                    }}
+                />
             )}
         </Box>
     )

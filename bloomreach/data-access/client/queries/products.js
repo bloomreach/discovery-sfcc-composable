@@ -9,6 +9,7 @@ import {
     getQueryParamsSettings,
     getUseQuerySettings
 } from '@bloomreach/data-access/client/queries/helpers'
+import {getConfig} from '@salesforce/pwa-kit-runtime/utils/ssr-config'
 
 export const useGetProductsByFilters = (params) => {
     const location = useLocation()
@@ -17,8 +18,10 @@ export const useGetProductsByFilters = (params) => {
 
     const apiUrl = `${appOrigin}${blmApiUrl}`
 
+    const {app: appConfig} = getConfig()
+
     const queryParams = new URLSearchParams({
-        ...getQueryParamsSettings({appOrigin, location}),
+        ...getQueryParamsSettings({appOrigin, location, appConfig}),
         request_type: 'search',
         fl: 'pid,title,brand,price,sale_price,thumb_image,url,description',
         // We need this line to include price in the refinement result options

@@ -3,10 +3,10 @@ import PropTypes from 'prop-types'
 
 import {Stack, Heading, Box, Divider} from '@salesforce/retail-react-app/app/components/shared/ui'
 import RecentSearches from '@salesforce/retail-react-app/app/components/search/partials/recent-searches'
-import Suggestions from '@salesforce/retail-react-app/app/components/search/partials/suggestions'
+import Suggestions from './suggestions'
 import {SUGGESTION_TYPE_KEYS} from '@bloomreach/constants'
 
-const SearchSuggestions = ({recentSearches, searchSuggestions, closeAndNavigate}) => {
+const SearchSuggestions = ({recentSearches, searchSuggestions, closeAndNavigate, searchQuery}) => {
     const hasCategorySuggestions = searchSuggestions?.categorySuggestions?.length
     const hasPhraseSuggestions = searchSuggestions?.phraseSuggestions?.length
     const hasProductSuggestions = searchSuggestions?.productSuggestions?.length
@@ -19,7 +19,7 @@ const SearchSuggestions = ({recentSearches, searchSuggestions, closeAndNavigate}
                     {SUGGESTION_TYPE_KEYS?.map((suggestEntry, index) => {
                         return (
                             <Box key={index}>
-                                <Box paddingX={6} paddingY={3}>
+                                <Box padding="10px 15px">
                                     <Heading
                                         as="h6"
                                         size="sm"
@@ -33,6 +33,8 @@ const SearchSuggestions = ({recentSearches, searchSuggestions, closeAndNavigate}
                                     <Suggestions
                                         closeAndNavigate={closeAndNavigate}
                                         suggestions={searchSuggestions?.[suggestEntry.key]}
+                                        searchQuery={searchQuery}
+                                        suggestionType={suggestEntry.key}
                                     />
                                 </Box>
 
@@ -56,7 +58,8 @@ const SearchSuggestions = ({recentSearches, searchSuggestions, closeAndNavigate}
 SearchSuggestions.propTypes = {
     recentSearches: PropTypes.array,
     searchSuggestions: PropTypes.object,
-    closeAndNavigate: PropTypes.func
+    closeAndNavigate: PropTypes.func,
+    searchQuery: PropTypes.string
 }
 
 export default SearchSuggestions

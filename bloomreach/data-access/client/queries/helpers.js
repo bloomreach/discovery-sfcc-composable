@@ -1,4 +1,3 @@
-import {ACCOUNT_ID, AUTH_KEY, DOMAIN_KEY} from '@bloomreach/constants'
 import random from 'lodash/random'
 import Cookies from 'js-cookie'
 
@@ -24,23 +23,30 @@ export const getUrls = (appOrigin, location) => {
     }
 }
 
-export const getQueryParamsSettings = ({appOrigin, location}) => {
+export const getQueryParamsSettings = ({appOrigin, location, appConfig}) => {
     const {url, ref_url} = getUrls(appOrigin, location)
 
-    return {
-        auth_key: AUTH_KEY,
-        account_id: ACCOUNT_ID,
-        domain_key: DOMAIN_KEY,
+    const result = {
         request_id: getRequestID(),
         _br_uid_2: getBrUid(),
         ref_url,
         url
     }
+
+    if (appConfig?.blm) {
+        const {accountId, authKey, userId} = appConfig.blm
+
+        result.auth_key = authKey
+        result.account_id = accountId
+        result.domain_key = userId
+    }
+
+    return result
 }
 
 export const getUseQuerySettings = ({params, apiUrl, queryParams}) => {
     return {
-        queryKey: [JSON.stringify(params)],
+        queryKey: [JSON.stringify(params), apiUrl],
         queryFn: async () => {
             const apiUrlWithParams = `${apiUrl}?${queryParams}`
             const response = await fetch(apiUrlWithParams)

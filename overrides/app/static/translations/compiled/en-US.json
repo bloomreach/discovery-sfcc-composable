@@ -1309,20 +1309,6 @@
       "value": "My Account"
     }
   ],
-  "home.description.shop_products": [
-    {
-      "type": 0,
-      "value": "This section contains content from the catalog. "
-    },
-    {
-      "type": 1,
-      "value": "docLink"
-    },
-    {
-      "type": 0,
-      "value": " on how to replace it."
-    }
-  ],
   "home.features.description.cart_checkout": [
     {
       "type": 0,
@@ -1395,12 +1381,6 @@
       "value": "Wishlist"
     }
   ],
-  "home.heading.shop_products": [
-    {
-      "type": 0,
-      "value": "Shop Products"
-    }
-  ],
   "home.hero_features.link.design_kit": [
     {
       "type": 0,
@@ -1423,12 +1403,6 @@
     {
       "type": 0,
       "value": "Get started"
-    }
-  ],
-  "home.link.read_docs": [
-    {
-      "type": 0,
-      "value": "Read docs"
     }
   ],
   "item_attributes.label.promotions": [

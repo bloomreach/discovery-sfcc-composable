@@ -62,7 +62,7 @@ const CheckoutConfirmation = () => {
     const {track} = useBloomreachAnalytics()
 
     useEffect(() => {
-        if (order) {
+        if (order && products?.data) {
             track({
                 ptype: 'conversion',
                 is_conversion: 1,
@@ -70,19 +70,20 @@ const CheckoutConfirmation = () => {
                 order_id: order?.orderNo,
                 currency: order?.currency,
                 basket: {
-                    items: order?.productItems.map((el) => {
+                    items: products.data.map((el, index) => {
                         return {
-                            prod_id: el?.productId,
-                            sku: el?.itemId,
-                            name: el?.productName,
-                            quantity: el?.quantity,
-                            price: el?.price
+                            prod_id: el?.master?.masterId,
+                            sku: el?.id,
+                            name: el?.name,
+                            // For quantity we need data from the order
+                            quantity: order?.productItems[index].quantity,
+                            price: order?.productItems[index].price
                         }
                     })
                 }
             })
         }
-    }, [order])
+    }, [products])
 
     useEffect(() => {
         form.reset({

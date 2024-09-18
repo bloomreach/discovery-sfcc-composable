@@ -1,6 +1,11 @@
 import isEmpty from 'lodash/isEmpty'
+import upperFirst from 'lodash/upperFirst'
 import {DEFAULT_LIMIT_VALUES} from '@salesforce/retail-react-app/app/constants'
-import {ATTR_MAP, EXCLUDED_LIST, SORT_OPTIONS} from './constants'
+import {ATTR_MAP, EXCLUDED_LIST, SORT_OPTIONS, PRODUCT_SUGGEST_COUNT} from './constants'
+
+export const capitalizeEachWord = (string) => {
+    return string.split(' ').map(upperFirst).join(' ')
+}
 
 const getKeyByValue = (map, searchValue) => {
     for (let [key, value] of map) {
@@ -229,12 +234,13 @@ export const transformProductSuggestions = (searchSuggestions, currency) => {
         return undefined
     }
 
-    return searchSuggestions.map((searchSuggestion) => {
+    return searchSuggestions.slice(0, PRODUCT_SUGGEST_COUNT).map((searchSuggestion) => {
         return {
             currency,
             price: searchSuggestion?.sale_price || searchSuggestion?.price,
             productId: searchSuggestion?.pid,
-            productName: searchSuggestion?.title
+            productName: searchSuggestion?.title,
+            thumbImage: searchSuggestion?.thumb_image
         }
     })
 }
@@ -258,22 +264,42 @@ export const parseSearchSuggestions = (suggestResponse, currency) => {
     }
 }
 
-export const parseRecommended = (recommendedResponse) => {
+export const getWidgetAnalyticsData = (widget) => {
+    if (!widget || isEmpty(widget)) {
+        return null
+    }
+
+    const result = {
+        wrid: widget?.rid,
+        wid: widget?.id,
+        wty: widget?.type
+    }
+
+    if (widget?.wq) {
+        result.wq = widget?.wq
+    }
+
+    return result
+}
+
+export const parseWidgetResponse = (widgetResponse) => {
     return {
         meta: {
-            title: recommendedResponse?.metadata?.widget?.description
+            title: widgetResponse?.metadata?.widget?.description
         },
-        products: recommendedResponse?.response?.docs.map((el) => {
+        products: widgetResponse?.response?.docs.map((el) => {
             return {
                 id: el.pid,
                 price: el.price,
                 productId: el.pid,
+                productName: capitalizeEachWord(el.title),
                 imageUrl: el.thumb_image,
                 image: {
                     disBaseLink: el.thumb_image
                 }
             }
-        })
+        }),
+        analytics: getWidgetAnalyticsData(widgetResponse?.metadata?.widget)
     }
 }
 

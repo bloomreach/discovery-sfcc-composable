@@ -9,7 +9,7 @@ const sites = require('./sites.js')
 
 function parseEnvVar(envVarName) {
     const val = process.env[envVarName]
-    if (val === undefined) {
+    if (val === undefined && !envVarName.startsWith('BLM_WIDGET')) {
         throw new Error(`Environment variable ${envVarName} is required.`)
     }
     try {
@@ -42,8 +42,8 @@ module.exports = {
         commerceAPI: {
             proxyPath: '/mobify/proxy/api',
             parameters: {
-                clientId: '17b5ae6b-2245-47e3-8460-becfe2570ad5',
-                organizationId: 'f_ecom_zzrk_005',
+                clientId: '15ab9572-43ff-4fb3-8f50-393acea409d2',
+                organizationId: 'f_ecom_zzrk_002',
                 shortCode: 'kv7kzm78',
                 siteId: 'Bloomreach_SFRA'
             }
@@ -63,7 +63,12 @@ module.exports = {
             authKey: parseEnvVar('BLM_AUTH_KEY') || null,
             userId: parseEnvVar('BLM_DOMAIN_KEY') || null,
             catalogName: parseEnvVar('BLM_CATALOG_NAME') || null,
+            widgetBestSellerId: parseEnvVar('BLM_WIDGET_BEST_SELLER_ID') || null,
             widgetRecommendId: parseEnvVar('BLM_WIDGET_RECOMMEND_ID') || null,
+            widgetFrequentlyViewedTogetherId:
+                parseEnvVar('BLM_WIDGET_FREQUENTLY_VIEWED_TOGETHER_ID') || null,
+            widgetFrequentlyBoughtTogetherId:
+                parseEnvVar('BLM_WIDGET_FREQUENTLY_BOUGHT_TOGETHER_ID') || null,
             debug: parseEnvVar('BLM_DEBUG') || null,
             testData: parseEnvVar('BLM_TEST_DATA') || null
         }
@@ -95,7 +100,7 @@ module.exports = {
                 path: 'api'
             },
             {
-                host: 'zzrk-005.dx.commercecloud.salesforce.com',
+                host: 'zzrk-002.dx.commercecloud.salesforce.com',
                 path: 'ocapi'
             },
             {

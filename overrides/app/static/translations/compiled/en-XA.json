@@ -2773,28 +2773,6 @@
       "value": "]"
     }
   ],
-  "home.description.shop_products": [
-    {
-      "type": 0,
-      "value": "["
-    },
-    {
-      "type": 0,
-      "value": "Ŧħīş şḗḗƈŧīǿǿƞ ƈǿǿƞŧȧȧīƞş ƈǿǿƞŧḗḗƞŧ ƒřǿǿḿ ŧħḗḗ ƈȧȧŧȧȧŀǿǿɠ. "
-    },
-    {
-      "type": 1,
-      "value": "docLink"
-    },
-    {
-      "type": 0,
-      "value": " ǿǿƞ ħǿǿẇ ŧǿǿ řḗḗƥŀȧȧƈḗḗ īŧ."
-    },
-    {
-      "type": 0,
-      "value": "]"
-    }
-  ],
   "home.features.description.cart_checkout": [
     {
       "type": 0,
@@ -2963,20 +2941,6 @@
       "value": "]"
     }
   ],
-  "home.heading.shop_products": [
-    {
-      "type": 0,
-      "value": "["
-    },
-    {
-      "type": 0,
-      "value": "Şħǿǿƥ Ƥřǿǿḓŭŭƈŧş"
-    },
-    {
-      "type": 0,
-      "value": "]"
-    }
-  ],
   "home.hero_features.link.design_kit": [
     {
       "type": 0,
@@ -3027,20 +2991,6 @@
     {
       "type": 0,
       "value": "Ɠḗḗŧ şŧȧȧřŧḗḗḓ"
-    },
-    {
-      "type": 0,
-      "value": "]"
-    }
-  ],
-  "home.link.read_docs": [
-    {
-      "type": 0,
-      "value": "["
-    },
-    {
-      "type": 0,
-      "value": "Řḗḗȧȧḓ ḓǿǿƈş"
     },
     {
       "type": 0,

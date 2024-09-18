@@ -46,19 +46,29 @@ import {useHistory, useLocation, useParams} from 'react-router-dom'
 import {useToast} from '@salesforce/retail-react-app/app/hooks/use-toast'
 import {useWishList} from '@salesforce/retail-react-app/app/hooks/use-wish-list'
 import {useBloomreachAnalytics} from '@bloomreach/hooks/analytics'
-import Recommended from '@bloomreach/components/Recommended/'
+import WidgetProductScroller from '@bloomreach/components/WidgetProductScroller'
+
+import {getConfig} from '@salesforce/pwa-kit-runtime/utils/ssr-config'
 
 const ProductDetail = () => {
     const {formatMessage} = useIntl()
     const history = useHistory()
     const location = useLocation()
-    const {track} = useBloomreachAnalytics()
+    const {track, log} = useBloomreachAnalytics()
     const einstein = useEinstein()
     const toast = useToast()
     const navigate = useNavigation()
     const [productSetSelection, setProductSetSelection] = useState({})
     const childProductRefs = React.useRef({})
     const customerId = useCustomerId()
+    const {app: appConfig} = getConfig()
+
+    const widgetsArray = [
+        appConfig?.blm?.widgetRecommendId,
+        appConfig?.blm?.widgetFrequentlyViewedTogetherId,
+        appConfig?.blm?.widgetFrequentlyBoughtTogetherId
+    ]
+
     /****************************** Basket *********************************/
     const {data: basket} = useCurrentBasket()
     const addItemToBasketMutation = useShopperBasketsMutation('addItemToBasket')
@@ -75,7 +85,8 @@ const ProductDetail = () => {
         data: product,
         isLoading: isProductLoading,
         isError: isProductError,
-        error: productError
+        error: productError,
+        isRefetching
     } = useProduct(
         {
             parameters: {
@@ -220,6 +231,16 @@ const ProductDetail = () => {
                 body: productItems
             })
 
+            const addedProduct = productSelectionValues[0]?.product
+
+            log({
+                eventGroup: 'cart',
+                eventType: 'click-add',
+                eventData: {
+                    prod_id: addedProduct?.master?.masterId,
+                    sku: addedProduct?.id
+                }
+            })
             // einstein.sendAddToCart(productItems)
 
             // If the items were successfully added, set the return value to be used
@@ -276,10 +297,10 @@ const ProductDetail = () => {
         track({
             ptype: 'product',
             title: product.pageTitle,
-            prod_id: product.id,
+            prod_id: product?.master?.masterId,
             prod_name: product.name
         })
-    }, [product?.id])
+    }, [product?.master?.masterId])
 
     /**************** Einstein ****************/
     useEffect(() => {
@@ -394,7 +415,24 @@ const ProductDetail = () => {
                 {/* Product Recommendations */}
                 <Stack spacing={16}>
                     {/* Removed other Product Recommendations in favor of Specifically Bloomreach recommender component below */}
-                    <Recommended productId={product?.id} mx={{base: -4, md: -8, lg: 0}} />
+                    {!isRefetching &&
+                        widgetsArray.map((widget) => {
+                            if (!widget) {
+                                return null
+                            }
+
+                            return (
+                                <WidgetProductScroller
+                                    mx={{base: -4, md: -8, lg: 0}}
+                                    key={widget}
+                                    productId={product?.id}
+                                    widgetSettings={{
+                                        id: widget,
+                                        type: 'item'
+                                    }}
+                                />
+                            )
+                        })}
                 </Stack>
             </Stack>
         </Box>

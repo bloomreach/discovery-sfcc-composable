@@ -3,19 +3,13 @@ import PropTypes from 'prop-types'
 
 import {isServer} from '@salesforce/retail-react-app/app/utils/utils'
 
-import {ACCOUNT_ID, AUTH_KEY, DEBUG, TEST_DATA, scriptUrl, STATUS} from '../../constants'
+import {STATUS} from '../../constants'
 
 import {useLocation} from 'react-router-dom'
 import isEqual from 'lodash/isEqual'
+import {getConfig} from '@salesforce/pwa-kit-runtime/utils/ssr-config'
 
 const BloomreachAnalyticsContext = createContext(null)
-
-const defaultData = {
-    acct_id: parseInt(ACCOUNT_ID),
-    domain_key: AUTH_KEY,
-    debug: DEBUG,
-    test_data: TEST_DATA
-}
 
 function logPageView(BrTrk, data) {
     const tracker = BrTrk.getTracker()
@@ -27,12 +21,40 @@ function logPageView(BrTrk, data) {
     tracker.logPageView()
 }
 
+function logEvent(BrTrk, eventLogData, accountId) {
+    const {eventGroup, eventType, eventData} = eventLogData
+    const tracker = BrTrk.getTracker()
+
+    const logData = {
+        ...eventData,
+        acct_id: accountId
+    }
+
+    if (eventGroup === 'cart') {
+        tracker.logEvent(eventGroup, eventType, logData)
+    } else if (eventGroup === 'widget') {
+        tracker.logEvent(eventGroup, eventType, logData, true)
+    } else {
+        tracker.logEvent(eventGroup, eventType, logData, {}, true)
+    }
+}
+
 export const BloomreachAnalyticsProvider = ({children}) => {
     const [BrTrk, setBrTrk] = useState(undefined)
     const [status, setStatus] = useState(STATUS.INIT)
     const location = useLocation()
     const [brData, setBrData] = useState(null)
+    const [eventData, setEventData] = useState(null)
     const eventQueue = useRef([])
+
+    const {app: appConfig} = getConfig()
+
+    const defaultData = {
+        acct_id: parseInt(appConfig?.blm?.accountId),
+        domain_key: appConfig?.blm?.userId,
+        debug: appConfig?.blm?.debug,
+        test_data: appConfig?.blm?.testData
+    }
 
     const prevBrData = useRef(null)
 
@@ -40,7 +62,7 @@ export const BloomreachAnalyticsProvider = ({children}) => {
         const brTrkScript = document.createElement('script')
         brTrkScript.type = 'text/javascript'
         brTrkScript.async = true
-        brTrkScript.src = scriptUrl
+        brTrkScript.src = `/mobify/proxy/bloomreach-cdn/v1/br-trk-${defaultData.acct_id}.js`
 
         brTrkScript.onload = () => {
             setBrTrk(window.BrTrk)
@@ -104,8 +126,20 @@ export const BloomreachAnalyticsProvider = ({children}) => {
         })
     }
 
+    useEffect(() => {
+        if (eventData && status === STATUS.LOADED) {
+            logEvent(BrTrk, eventData, defaultData?.acct_id)
+        }
+    }, [eventData, status])
+
+    const log = (data) => {
+        if (isServer) return
+
+        setEventData(data)
+    }
+
     return (
-        <BloomreachAnalyticsContext.Provider value={{brData, BrTrk, status, track}}>
+        <BloomreachAnalyticsContext.Provider value={{brData, BrTrk, status, track, log}}>
             {children}
         </BloomreachAnalyticsContext.Provider>
     )
